@@ -1,5 +1,6 @@
 object Main {
   def main(args: Array[String]): Unit = {
-    DayOne.run()
+    // DayOne.run()
+    DayTwo.run()
   }
 }
