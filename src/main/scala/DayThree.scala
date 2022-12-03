@@ -1,15 +1,17 @@
 object DayThree extends App {
 
-  private lazy val prioMap =
-    ('a' to 'z').zipWithIndex.map(r => (r._1, r._2 + 1)).toMap ++
-    ('A' to 'Z').zipWithIndex.map(r => (r._1, r._2 + 27)).toMap
+  private lazy val prioMap = (('a' to 'z') ++ ('A' to 'Z'))
+    .zipWithIndex
+    .map(r => (r._1, r._2 + 1))
+    .toMap
 
   def partOne(rucksacks: Seq[String]): Int = {
 
     rucksacks.map(sack => {
       sack.splitAt(sack.length / 2) match {
         case (first, second) => prioMap(
-          first.toSet
+          first
+            .toSet
             .intersect(second.toSet)
             .head
         )
@@ -18,11 +20,12 @@ object DayThree extends App {
   }
 
   def partTwo(rucksack: Seq[String]): Int = {
-    val groups: Seq[Seq[String]] = rucksack.sliding(3, 3).toSeq
+    val groups: Seq[Seq[String]] = rucksack.grouped(3).toSeq
 
     groups.map {
       case Seq(first, second, third) => prioMap(
-        first.toSet
+        first
+          .toSet
           .intersect(second.toSet)
           .intersect(third.toSet)
           .head
