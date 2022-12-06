@@ -30,22 +30,22 @@ object DayFive {
     }
   }
 
+
+
   def partOne(stacks: Seq[String], instructions: Seq[String]): String = {
     val startingMap = buildStackMap(stacks)
 
     instructions.foldLeft(startingMap) { (mapSoFar, instruction) =>
 
       val Array(howMany, fromStack, toStack) = instruction.split("\\D+").filter(_.nonEmpty).map(_.toInt)
-      val numberOfMoves = 1 to howMany
 
-      numberOfMoves.foldLeft(mapSoFar) { (intermediateMap, _) =>
-        val crateToMove: String = intermediateMap(fromStack).last
-        val updatedFromStack = intermediateMap(fromStack).dropRight(1)
-        val updatedToStack = intermediateMap(toStack) ++ Seq(crateToMove)
-        val updatedFrom = intermediateMap + (fromStack -> updatedFromStack)
+      val cratesToMove: Seq[String] = mapSoFar(fromStack).takeRight(howMany).reverse
+      val updatedFromStack = mapSoFar(fromStack).dropRight(1)
+      val updatedToStack = mapSoFar(toStack) ++ cratesToMove
+      val updatedFrom = mapSoFar + (fromStack -> updatedFromStack)
 
-        updatedFrom + (toStack -> updatedToStack)
-      }
+      updatedFrom + (toStack -> updatedToStack)
+
     }.toList.sortBy(_._1).map(_._2.last).mkString
   }
 
