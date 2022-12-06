@@ -1,5 +1,3 @@
-import com.sun.xml.internal.fastinfoset.util.CharArray
-
 object DaySix {
 
   def partOne(buffer: Array[Char]): Int = {
@@ -10,13 +8,10 @@ object DaySix {
     slideAndFind(buffer, 14)
   }
 
-  private def slideAndFind(buffer: Array[Char], slideBy: Int) = {
-    buffer
-      .sliding(slideBy)
-      .zipWithIndex
-      .find(_._1.toSet.size == slideBy)
-      .map(slideBy + _._2)
-      .get
+  // Check previous commit for original solution
+  // TIL indexWhere -- thanks @maneatingape!!
+  private def slideAndFind(buffer: Array[Char], size: Int) = {
+    buffer.sliding(size).indexWhere(_.toSet.size == size) + size
   }
 
   def run(): Unit = {
