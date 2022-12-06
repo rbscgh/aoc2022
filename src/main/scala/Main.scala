@@ -4,6 +4,7 @@ object Main {
 //    DayTwo.run()
 //    DayThree.run()
 //    DayFour.run()
-    DayFive.run()
+//    DayFive.run()
+    DaySix.run()
   }
 }
