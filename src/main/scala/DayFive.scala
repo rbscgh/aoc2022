@@ -15,55 +15,40 @@ object DayFive {
 
     val inputZippedToColumn = stackLines.dropRight(1)
       .map(_.split(""))
-      .map(_.zipWithIndex
-        .filterNot(_._1.equals(" ")) // spaces
-        .filterNot(r => r._1.equals("[") || r._1.equals("]"))) // braces
+      .map(_.zipWithIndex.filter(_._1.matches("\\w")))
+      .flatMap(_.toList)
 
-    inputZippedToColumn.foldLeft(emptyMap) { (mapSoFar, row) =>
-      row.foldLeft(mapSoFar) { (upmap, token) =>
-        val col = token._2
-        val crate = token._1
+    inputZippedToColumn.foldLeft(emptyMap) { (mapSoFar, token) =>
+      val col = token._2
+      val crate = token._1
 
-        val stack: Int = columnToStack(col)
-        upmap + (stack -> (upmap.get(stack).map(Seq(crate) ++ _).getOrElse(Seq(crate))))
-      }
+      val stack: Int = columnToStack(col)
+      mapSoFar + (stack -> (mapSoFar.get(stack).map(Seq(crate) ++ _).getOrElse(Seq(crate))))
     }
   }
 
-
-
-  def partOne(stacks: Seq[String], instructions: Seq[String]): String = {
+  private def performCraneMovements(stacks: Seq[String], instructions: Seq[String], maintainOrder: Boolean): String = {
     val startingMap = buildStackMap(stacks)
 
     instructions.foldLeft(startingMap) { (mapSoFar, instruction) =>
-
-      val Array(howMany, fromStack, toStack) = instruction.split("\\D+").filter(_.nonEmpty).map(_.toInt)
-
-      val cratesToMove: Seq[String] = mapSoFar(fromStack).takeRight(howMany).reverse
-      val updatedFromStack = mapSoFar(fromStack).dropRight(1)
-      val updatedToStack = mapSoFar(toStack) ++ cratesToMove
-      val updatedFrom = mapSoFar + (fromStack -> updatedFromStack)
-
-      updatedFrom + (toStack -> updatedToStack)
-
-    }.toList.sortBy(_._1).map(_._2.last).mkString
-  }
-
-  def partTwo(stacks: Seq[String], instructions: Seq[String]): String = {
-    val startingMap = buildStackMap(stacks)
-
-    instructions.foldLeft(startingMap){ (mapSoFar, instruction) =>
       val Array(howMany, fromStack, toStack) = instruction.split("\\D+").filter(_.nonEmpty).map(_.toInt)
 
       val cratesToMove: Seq[String] = mapSoFar(fromStack).takeRight(howMany)
       val updatedFromStack = mapSoFar(fromStack).dropRight(howMany)
-      val updatedToStack = mapSoFar(toStack) ++ cratesToMove
+      val updatedToStack = mapSoFar(toStack) ++ (if (maintainOrder) cratesToMove else cratesToMove.reverse)
       val afterFrom = mapSoFar + (fromStack -> updatedFromStack)
       val afterTo = afterFrom + (toStack -> updatedToStack)
 
       afterTo
     }
   }.toList.sortBy(_._1).map(_._2.last).mkString
+
+
+  def partOne(stacks: Seq[String], instructions: Seq[String]): String =
+    performCraneMovements(stacks, instructions, maintainOrder = true)
+
+  def partTwo(stacks: Seq[String], instructions: Seq[String]): String =
+    performCraneMovements(stacks, instructions, maintainOrder = false)
 
 
   def run(): Unit = {
