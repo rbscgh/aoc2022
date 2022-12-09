@@ -1,78 +1,62 @@
 object DayEight {
-
-  private val buildGrid: Seq[String] => Array[(Array[(Int, Int)], Int)] = { lines =>
+  private val parse: Seq[String] => Array[(Array[(Int, Int)], Int)] = { lines =>
     lines
       .map(_.split("").map(_.toInt).zipWithIndex.toArray)
       .zipWithIndex.toArray
   }
 
   def partOne(lines: Seq[String]): Int = {
-    val grid = buildGrid(lines)
-
-    grid.flatMap(trees => {
-      val row = trees._2
-      trees._1.map(tree => {
-        val col = tree._2
-        val treeVal = tree._1
-        val verticalTrees: Array[Int] = grid.map(_._1(col)).map(_._1)
-        val (right, left, up, down) = getNeighborsToVisit(row, col, trees._1, verticalTrees)
-
-        val isVisibleFromRight  = isVisibleFrom(right, treeVal)
-        val isVisibleFromLeft   = isVisibleFrom(left, treeVal)
-        val isVisibleFromUp     = isVisibleFrom(up, treeVal)
-        val isVisibleFromDown   = isVisibleFrom(down, treeVal)
-
-
-        Seq(isVisibleFromUp, isVisibleFromDown, isVisibleFromLeft, isVisibleFromRight).contains(true)
-      })
-    }).count(_ == true)
+    val canSeeTreeFromEdge = (x: Seq[Int]) => if (x.contains(1)) 1 else 0
+    performTreeOp(parse(lines), isVisibleFrom, canSeeTreeFromEdge).count(_ == 1)
   }
 
-  private def isVisibleFrom(remainingTrees: Array[Int], treeToSee: Int): Boolean = {
-    remainingTrees.isEmpty || (remainingTrees.map(treeToSee > _).toSet == Set(true))
-  }
 
   def partTwo(lines: Seq[String]): Int = {
-    val grid = buildGrid(lines)
+    val totalScenicScore = (x: Seq[Int]) => x.product
+    performTreeOp(parse(lines), calculateScenicScore, totalScenicScore).max
+  }
 
+  private def performTreeOp(
+              grid: Array[(Array[(Int, Int)], Int)],
+              neighborEval: (Array[Int], Int) => Int,
+              treeEval: Seq[Int] => Int
+  ): Array[Int] = {
     grid.flatMap(trees => {
       val row = trees._2
       trees._1.map(tree => {
         val col = tree._2
         val treeVal = tree._1
-        val verticalTrees = grid.map(_._1(col)).map(_._1)
+        val currentColumn: Array[Int] = grid.map(_._1(col)).map(_._1)
+        val currentRow: Array[Int] = trees._1.map(_._1)
+        val neighboringTrees: Array[Int] = getNeighborsToVisit(row, col, currentRow, currentColumn)
+          .map(direction => neighborEval(direction, treeVal))
 
-        val (right, left, up, down) = getNeighborsToVisit(row, col, trees._1, verticalTrees)
-
-        val treeScoreRight  = calculateScenicScore(right, treeVal)
-        val treeScoreLeft   = calculateScenicScore(left, treeVal)
-        val treeScoreUp     = calculateScenicScore(up, treeVal)
-        val treeScoreDown   = calculateScenicScore(down, treeVal)
-
-        treeScoreRight * treeScoreLeft * treeScoreDown * treeScoreUp
+        treeEval(neighboringTrees)
       })
-    }).max
+    })
   }
 
-  private def calculateScenicScore(remainingTrees: Array[Int], treeToEvaluate: Int): Int = {
+  private val isVisibleFrom: (Array[Int], Int) => Int = { (remainingTrees, treeToSee) =>
+    if (remainingTrees.isEmpty || (remainingTrees.map(treeToSee > _).toSet == Set(true))) 1
+    else 0
+  }
+
+  private val calculateScenicScore: (Array[Int], Int) => Int = { (remainingTrees, treeToEvaluate) =>
     remainingTrees.foldLeft((0, true)) { case ((cnt, keepCounting), tree) =>
       (keepCounting, treeToEvaluate > tree) match {
-        case (true, true) => (cnt + 1, keepCounting)
+        case (true, true) => (cnt + 1, true)
         case (true, false) => (cnt + 1, false)
-        case (false, true) | (false, false) => (cnt, keepCounting)
+        case _ => (cnt, keepCounting)
       }
     }._1
   }
 
-  private def getNeighborsToVisit(row: Int, column: Int, currentRowTrees: Array[(Int, Int)], verticalTrees: Array[Int]):
-  (Array[Int], Array[Int], Array[Int], Array[Int]) = {
-    (
-      currentRowTrees.slice(column + 1, currentRowTrees.length).map(_._1),
-      currentRowTrees.slice(0, column).reverse.map(_._1),
-      verticalTrees.slice(0, row).reverse,
-      verticalTrees.slice(row + 1, verticalTrees.length)
-    )
-  }
+  private def getNeighborsToVisit(row: Int, column: Int, currentRowTrees: Array[Int], currentColumnTrees: Array[Int]): Array[Array[Int]] = Array(
+    currentRowTrees.slice(column + 1, currentRowTrees.length),
+    currentRowTrees.slice(0, column).reverse,
+    currentColumnTrees.slice(0, row).reverse,
+    currentColumnTrees.slice(row + 1, currentColumnTrees.length)
+  )
 
   def run(): Unit = {
     val input = io.Source.fromResource("dayeight.txt").getLines().toSeq
