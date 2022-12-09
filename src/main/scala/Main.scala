@@ -7,6 +7,6 @@ object Main {
 //    DayFive.run()
 //    DaySix.run()
 //    DaySeven.run()
-    DayEight.run()
+//    DayEight.run()
   }
 }

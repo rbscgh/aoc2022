@@ -1,32 +1,19 @@
-import scala.io.Source
-
 object DayOne {
 
-  val readFile: List[String] = {
-    val source = Source.fromFile("src/main/input/dayone.txt")
-    val input = source.mkString.split("\n\n").toList
-    source.close()
-    input
-  }
-
-  private def combineAndSort: List[Int] = {
-    readFile
+  private def combine:Seq[String] => Seq[Int] = { lines =>
+    lines
       .map(elf => elf.split("\n").toList.map(_.toInt))
       .map(snacksPerElf => snacksPerElf.sum)
-      .sorted(Ordering.Int.reverse)
   }
 
-  def partOne: Int = {
-    combineAndSort.head
-  }
+  def partOne: Seq[String] => Int = combine(_).max
 
-  def partTwo: Int = {
-    combineAndSort.slice(0, 3).sum
-  }
+  def partTwo: Seq[String] => Int = combine(_).sorted(Ordering.Int.reverse).take(3).sum
 
   def run(): Unit = {
-    val p1 = partOne
-    val p2 = partTwo
+    val input = io.Source.fromResource("dayone.txt").mkString.split("\n\n").toSeq
+    val p1 = partOne(input)
+    val p2 = partTwo(input)
 
     println(s"part one result $p1")
     println(s"part two result $p2")
