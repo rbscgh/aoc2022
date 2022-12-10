@@ -8,6 +8,7 @@ object Main {
 //    DaySix.run()
 //    DaySeven.run()
 //    DayEight.run()
-    DayNine.run()
+//    DayNine.run()
+    DayTen.run()
   }
 }
