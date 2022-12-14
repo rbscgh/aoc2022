@@ -22,7 +22,7 @@ object DayThirteen {
     val replaced = allpackets.map(_.replaceAll("10", ":"))
     val withDividers = replaced :+ "[[2]]" :+ "[[6]]"
 
-    val res = bubblesort(withDividers).reverse
+    val res = withDividers.sortWith(eval)
 
     Seq(
       (res.indexWhere(s => s == "[[2]]") + 1),
@@ -35,20 +35,6 @@ object DayThirteen {
 
     println(partOne(input))
     println(partTwo(input))
-  }
-
-  private def bubblesort(source: Seq[String]): Seq[String] = {
-
-    def sort(iteration: Seq[String], source: Seq[String], result: Seq[String]): Seq[String] = source match {
-      case h1 :: h2 :: rest =>
-        if (eval(h1, h2)) sort(iteration, h1 :: rest, result :+ h2) else sort(iteration, h2 :: rest, result :+ h1)
-      case l :: Nil =>
-        sort(iteration, Nil, result :+ l)
-      case Nil =>
-        if (iteration.isEmpty) result else sort(iteration.dropRight(1), result, Nil)
-    }
-
-    sort(source, source, Nil)
   }
 
   @tailrec
